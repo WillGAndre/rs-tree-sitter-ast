@@ -1,0 +1,86 @@
+============================================
+Macro invocation 
+============================================
+
+a!();
+b![];
+c!{};
+a!(a + b);
+a!('a');
+d::e!();
+f::g::h!{};
+
+----
+
+(source_file
+  (macro_invoc (identifier) (token_tree))
+  (macro_invoc (identifier) (token_tree))
+  (macro_invoc (identifier) (token_tree))
+  (macro_invoc (identifier) (token_tree (identifier) (identifier)))
+  (macro_invoc (identifier) (token_tree (char_lit)))
+  (macro_invoc (scoped_identifier (identifier) (identifier)) (token_tree))
+  (macro_invoc (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (token_tree)))
+
+============================================
+Macro definition
+============================================
+
+macro_rules! hello_world {
+    () => ( println!("Hello World!"); )
+}
+
+macro_rules! sum2 {
+    () => { 2 + 2 };
+}
+
+macro_rules! foo {
+    (x => $e:expr) => ( println!("x: {}", $e); )
+}
+
+macro_rules! call_foo {
+    ($($e:expr),?) => { $($e),? };
+}
+
+----
+
+(source_file
+  (macro_def
+    name: (identifier)
+    (macro_rule
+      left: (token_tree)
+      right: (token_tree
+        (identifier)
+        (token_tree
+          (string_lit)))))
+  (macro_def
+    name: (identifier)
+    (macro_rule
+      left: (token_tree)
+      right: (token_tree
+        (integer_lit)
+        (integer_lit))))
+  (macro_def
+    name: (identifier)
+    (macro_rule
+      left: (token_tree
+        (identifier)
+        (token_bind
+          name: (metavariable)
+          type: (fragment_specifier)))
+      right: (token_tree
+        (identifier)
+        (token_tree
+          (string_lit)
+          (metavariable)))))
+  (macro_def
+    name: (identifier)
+    (macro_rule
+      left: (token_tree
+        (token_rep
+          (token_bind
+            name: (metavariable)
+            type: (fragment_specifier))))
+      right: (token_tree
+        (token_rep
+          (metavariable)))))
+)

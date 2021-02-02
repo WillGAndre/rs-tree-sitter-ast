@@ -1,0 +1,141 @@
+============================================
+Integer literal
+============================================
+
+1;
+0___0;
+123;
+0usize;
+123i32;
+123u32;
+123_u32;
+0xff_u8;
+0o70_i16;
+0b1111_1111_1001_0000_i32;
+1u128;
+
+----
+
+(source_file
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit)
+  (integer_lit))
+
+
+============================================
+Float literals
+============================================
+
+123.123;
+2.;
+123.0f64;
+0.15f64;
+1_234.0E+18f64;
+12E+99_f64;
+
+----
+
+(source_file
+  (float_lit)
+  (float_lit)
+  (float_lit)
+  (float_lit)
+  (float_lit)
+  (float_lit))
+
+
+============================================
+Character literals
+============================================
+
+'x';
+b'x';
+'\'';
+'\\';
+'\n';
+'\xff';
+'\u22af';
+
+----
+
+(source_file
+  (char_lit)
+  (char_lit)
+  (char_lit)
+  (char_lit)
+  (char_lit)
+  (char_lit)
+  (char_lit))
+
+
+============================================
+String literals
+============================================
+
+"";
+"new";
+b"new";
+"side\nslide";
+"opt\
+    gar";
+"\"foo\"";
+"go\x23\x56far";
+"far \x25 go";
+
+----
+
+(source_file
+  (string_lit)
+  (string_lit)
+  (string_lit)
+  (string_lit)
+  (string_lit)
+  (string_lit)
+  (string_lit)
+  (string_lit))
+
+
+============================================
+Raw String literals
+============================================
+
+r#"aaa"#;
+r"foo";
+r#""foo""#;
+r##"foo #"# bar"##;
+r"R";
+r"\x52";
+br"aaa";
+
+----
+
+(source_file
+  (raw_string_lit)
+  (raw_string_lit)
+  (raw_string_lit)
+  (raw_string_lit)
+  (raw_string_lit)
+  (raw_string_lit)
+  (raw_string_lit))
+
+
+============================================
+Boolean literals
+============================================
+
+true;
+false;
+
+----
+
+(source_file
+  (boolean_lit)
+  (boolean_lit))

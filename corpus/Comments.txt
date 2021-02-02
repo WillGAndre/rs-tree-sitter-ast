@@ -1,0 +1,29 @@
+============================================
+Block comments
+============================================
+
+/* Block comment * */
+
+/*
+ *   Block comment
+ */
+
+----
+
+(source_file
+  (blk_comment)
+  (blk_comment))
+
+============================================
+Nested block/line comment
+============================================
+
+/* /* Nested block comment */ */
+
+// // Nested single line comment
+
+----
+
+(source_file
+    (blk_comment)
+    (line_comment))
