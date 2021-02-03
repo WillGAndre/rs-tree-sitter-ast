@@ -75,36 +75,37 @@ bool tree_sitter_rust_external_scanner_scan(void *payload, TSLexer *lexer, const
     // FLOAT_LIT
     if (valid_symbols[FLOAT_LIT] && iswdigit(lexer->lookahead)) {
         lexer->result_symbol = FLOAT_LIT;
-        bool frac = false;
-        bool expo = false;
 
         advance(lexer);
         while (isFloatDigit(lexer->lookahead)) {
             advance(lexer);
         }
 
-        // Fraction
-        if (lexer->lookahead == '.') {
-            frac = true;
-            advance(lexer);
+        bool has_fraction = false, has_exponent = false;
 
-            // Ex: 1.max(2) === Integer (We want floats!)
-            if (iswalpha(lexer->lookahead)) {
+        if (lexer->lookahead == '.') {
+            has_fraction = true;
+            advance(lexer);
+            if (iswalpha(lexer->lookahead))
+            {
+                // The dot is followed by a letter: 1.max(2) => not a float but an integer
                 return false;
             }
-            if (lexer->lookahead == '.') {return false;}
 
-            while(isFloatDigit(lexer->lookahead)) {
+            if (lexer->lookahead == '.')
+            {
+                return false;
+            }
+            while (isFloatDigit(lexer->lookahead))
+            {
                 advance(lexer);
             }
         }
 
-        // end of recognized token (there are multiple matching tokens)
         lexer->mark_end(lexer);
 
-        // Exponent
         if (lexer->lookahead == 'e' || lexer->lookahead == 'E') {
-            expo = true;
+            has_exponent = true;
             advance(lexer);
             if (lexer->lookahead == '+' || lexer->lookahead == '-') {
                 advance(lexer);
@@ -113,7 +114,6 @@ bool tree_sitter_rust_external_scanner_scan(void *payload, TSLexer *lexer, const
                 return true;
             }
             advance(lexer);
-
             while (isFloatDigit(lexer->lookahead)) {
                 advance(lexer);
             }
@@ -121,11 +121,16 @@ bool tree_sitter_rust_external_scanner_scan(void *payload, TSLexer *lexer, const
             lexer->mark_end(lexer);
         }
 
-        if (!frac && !expo) { return false; }
+        if (!has_exponent && !has_fraction)
+            return false;
 
-        if (lexer->lookahead != 'u' || lexer->lookahead != 'i' || lexer->lookahead != 'f') { return true; }
+        if (lexer->lookahead != 'u' && lexer->lookahead != 'i' && lexer->lookahead != 'f') {
+            return true;
+        }
         advance(lexer);
-        if (!iswdigit(lexer->lookahead)) { return true; }
+        if (!iswdigit(lexer->lookahead)) {
+            return true;
+        }
 
         while (iswdigit(lexer->lookahead)) {
             advance(lexer);
@@ -169,3 +174,4 @@ bool tree_sitter_rust_external_scanner_scan(void *payload, TSLexer *lexer, const
     }
     return false;
 }
+

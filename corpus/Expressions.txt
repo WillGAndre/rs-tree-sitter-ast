@@ -1,0 +1,805 @@
+============================================
+Identifiers
+============================================
+
+fn main() {
+  abc;
+}
+
+---
+
+(source_file
+  (function_item (identifier) (parameters) (block
+    (identifier))))
+
+============================================
+Raw identifiers
+============================================
+
+fn main() {
+  (r#abc as r#Def).r#ghi;
+}
+
+---
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters)
+    (block
+      (field_expression
+        (single_parenthesized_expression
+          (type_cast_expression (identifier) (type_identifier)))
+        (field_identifier)))))
+
+============================================
+Unary operator expressions
+============================================
+
+-num;
+!bits;
+*boxed_thing;
+
+---
+
+(source_file
+  (unary_expression (identifier))
+  (unary_expression (identifier))
+  (unary_expression (identifier)))
+
+============================================
+Reference expressions
+============================================
+
+&a;
+&mut self.name;
+
+---
+
+(source_file
+  (reference_expression (identifier))
+  (reference_expression (mutable_specifier) (field_expression (self) (field_identifier))))
+
+============================================
+Try expressions
+============================================
+
+a.unwrap()?;
+
+---
+
+(source_file
+  (question_mark_expression (call_expression (field_expression (identifier) (field_identifier)) (arguments))))
+
+============================================
+Binary operator expressions
+============================================
+
+a * b;
+a / b;
+a % b;
+a + b;
+a - b;
+a >> b;
+a << b;
+a == b;
+a && b;
+a || b;
+
+---
+
+(source_file
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier))
+  (binary_expression (identifier) (identifier)))
+
+============================================
+Grouped expressions
+============================================
+
+(0);
+(2 * (3 + 4));
+
+---
+
+(source_file
+  (single_parenthesized_expression (integer_lit))
+  (single_parenthesized_expression (binary_expression
+    (integer_lit)
+    (single_parenthesized_expression (binary_expression (integer_lit) (integer_lit))))))
+
+============================================
+Range expressions
+============================================
+
+1..2;
+3..;
+..4;
+..;
+1..b;
+a..b;
+
+---
+
+(source_file
+  (range_expression (integer_lit) (integer_lit))
+  (range_expression (integer_lit))
+  (range_expression (integer_lit))
+  (range_expression)
+  (range_expression (integer_lit) (identifier))
+  (range_expression (identifier) (identifier)))
+
+============================================
+Assignment expressions
+============================================
+
+x = y;
+
+---
+
+(source_file
+  (assignment_expression
+    left: (identifier)
+    right: (identifier)))
+
+============================================
+Compound assignment expressions
+============================================
+
+x += 1;
+x += y;
+
+---
+
+(source_file
+  (compound_assignment_expression
+    left: (identifier)
+    right: (integer_lit))
+  (compound_assignment_expression
+    left: (identifier)
+    right: (identifier)))
+
+============================================
+Type cast expressions
+============================================
+
+1000 as u8;
+let character = integer as char;
+let size: f64 = len(values) as f64;
+
+---
+
+(source_file
+  (type_cast_expression
+    value: (integer_lit)
+    type: (primitive_type))
+  (let_declaration
+    pattern: (identifier)
+    value: (type_cast_expression
+      value: (identifier)
+      type: (primitive_type)))
+  (let_declaration
+    pattern: (identifier)
+    type: (primitive_type)
+    value: (type_cast_expression
+      value: (call_expression
+        function: (identifier)
+        arguments: (arguments (identifier)))
+      type: (primitive_type))))
+
+============================================
+Call expressions
+============================================
+
+foo();
+add(1i32, 2i32);
+add(
+    1i32,
+    2i32,
+);
+
+---
+
+(source_file
+  (call_expression
+    function: (identifier)
+    arguments: (arguments))
+  (call_expression
+    function: (identifier)
+    arguments: (arguments (integer_lit) (integer_lit)))
+  (call_expression
+    function: (identifier)
+    arguments: (arguments (integer_lit) (integer_lit))))
+
+============================================
+Array expressions
+============================================
+
+[];
+[1, 2, 3];
+["a", "b", "c"];
+[0; 128];
+
+---
+
+(source_file
+  (array_expression)
+  (array_expression
+    (integer_lit)
+    (integer_lit)
+    (integer_lit))
+  (array_expression
+    (string_lit)
+    (string_lit)
+    (string_lit))
+  (array_expression
+    (integer_lit)
+    length: (integer_lit)))
+
+============================================
+Tuple expressions
+============================================
+
+();
+(0,);
+let (x, y, z) = (1, 2, 3);
+
+---
+
+(source_file
+  (unit_expression)
+  (tuple_expression (integer_lit))
+  (let_declaration
+    (tuple_pattern (identifier) (identifier) (identifier))
+    (tuple_expression (integer_lit) (integer_lit) (integer_lit))))
+
+============================================
+Struct expressions
+============================================
+
+NothingInMe {};
+Point {x: 10.0, y: 20.0};
+let a = SomeStruct { field1, field2: expression, field3, };
+let u = game::User {name: "Joe", age: 35, score: 100_000};
+
+---
+
+(source_file
+  (struct_expression (type_identifier)
+    (field_struct_list))
+  (struct_expression (type_identifier)
+    (field_struct_list
+      (field_norm (field_identifier) (float_lit))
+      (field_norm (field_identifier) (float_lit))))
+  (let_declaration
+    (identifier)
+    (struct_expression
+      (type_identifier)
+      (field_struct_list
+        (shorthand_field
+          (identifier))
+        (field_norm (field_identifier) (identifier))
+        (shorthand_field
+          (identifier)))))
+  (let_declaration
+    (identifier)
+    (struct_expression
+      (scoped_type_identifier (identifier) (type_identifier))
+      (field_struct_list
+        (field_norm (field_identifier) (string_lit))
+        (field_norm (field_identifier) (integer_lit))
+        (field_norm (field_identifier) (integer_lit))))))
+
+============================================
+Struct expressions with update initializers
+============================================
+
+let u = User{name, ..current_user()};
+
+---
+
+(source_file
+  (let_declaration
+    (identifier)
+    (struct_expression
+      (type_identifier)
+      (field_struct_list
+        (shorthand_field
+          (identifier))
+        (base_field (call_expression (identifier) (arguments)))))))
+
+============================================
+If expressions
+============================================
+
+fn main() {
+  if n == 1 {
+  } else if n == 2 {
+  } else {
+  }
+}
+
+let y = if x == 5 { 10 } else { 15 };
+
+---
+
+(source_file
+  (function_item
+    name: (identifier)
+    parameters: (parameters)
+    body: (block
+      (if_expression
+        condition: (binary_expression
+          left: (identifier)
+          right: (integer_lit))
+        then: (block)
+        else: (else_clause
+          (if_expression
+            condition: (binary_expression
+              left: (identifier)
+              right: (integer_lit))
+            then: (block)
+            else: (else_clause (block)))))))
+  (let_declaration
+    pattern: (identifier)
+    value: (if_expression
+      condition: (binary_expression
+        left: (identifier)
+        right: (integer_lit))
+      then: (block (integer_lit))
+      else: (else_clause (block (integer_lit))))))
+
+============================================
+If let expressions
+============================================
+
+if let ("Bacon", b) = dish {
+}
+
+---
+
+(source_file
+  (if_let_expression
+    (tuple_pattern (string_lit) (identifier))
+    (identifier)
+    (block)))
+
+============================================
+While let expressions
+============================================
+
+while let ("Bacon", b) = dish {
+}
+
+---
+
+(source_file
+  (while_let_expression
+    (tuple_pattern (string_lit) (identifier))
+    (identifier)
+    (block)))
+
+============================================
+Match expressions
+============================================
+
+match x {
+    1 => { "one" }
+    2 => "two",
+    -1 => 1,
+    -3.14 => 3,
+
+    #[attr1]
+    3 => "three",
+    macro!(4) => "four",
+    _ => "something else",
+}
+
+let msg = match x {
+    0 | 1 | 10 => "one of zero, one, or ten",
+    y if y < 20 => "less than 20, but not zero, one, or ten",
+    y if y == 200 =>
+      if a {
+        "200 (but this is not very stylish)"
+      }
+    _ => "something else",
+};
+
+---
+
+(source_file
+  (match_expression
+    value: (identifier)
+    body: (match_block
+      (match_arm
+        pattern: (match_pattern
+          (integer_lit))
+        value: (block
+          (string_lit)))
+      (match_arm
+        pattern: (match_pattern
+          (integer_lit))
+        value: (string_lit))
+      (match_arm
+        pattern: (match_pattern
+          (negative_lit
+            (integer_lit)))
+        value: (integer_lit))
+      (match_arm
+        pattern: (match_pattern
+          (negative_lit
+            (float_lit)))
+        value: (integer_lit))
+      (match_arm
+        (outer_attribute_item
+          (meta_item
+            (identifier)))
+        pattern: (match_pattern
+          (integer_lit))
+        value: (string_lit))
+      (match_arm
+        pattern: (macro_invoc
+          macro: (identifier)
+          (token_tree
+            (integer_lit)))
+        value: (string_lit))
+      (match_arm
+        pattern: (match_pattern)
+        value: (string_lit))))
+  (let_declaration
+    pattern: (identifier)
+    value: (match_expression
+      value: (identifier)
+      body: (match_block
+        (match_arm
+          pattern: (match_pattern
+            (or_pattern
+              (or_pattern
+                (integer_lit)
+                (integer_lit))
+              (integer_lit)))
+          value: (string_lit))
+        (match_arm
+          pattern: (match_pattern
+            (identifier)
+            condition: (binary_expression
+              left: (identifier)
+              right: (integer_lit)))
+          value: (string_lit))
+        (match_arm
+          pattern: (match_pattern
+            (identifier)
+            condition: (binary_expression
+              left: (identifier)
+              right: (integer_lit)))
+          value: (if_expression
+            condition: (identifier)
+            then: (block
+              (string_lit))))
+        (match_arm
+          pattern: (match_pattern)
+          value: (string_lit))))))
+
+============================================
+While expressions
+============================================
+
+while !done {
+  done = true;
+}
+
+---
+
+(source_file
+  (while_expression
+    condition: (unary_expression (identifier))
+    body: (block
+      (assignment_expression
+        left: (identifier)
+        right: (boolean_lit)))))
+
+============================================
+Loop expressions
+============================================
+
+'outer: loop {
+  'inner: loop {
+    break 'outer;
+    break true;
+  }
+}
+
+---
+
+(source_file
+  (loop_expression (loop_label (identifier)) (block
+    (loop_expression (loop_label (identifier)) (block
+      (break_expression (loop_label (identifier)))
+      (break_expression (boolean_lit)))))))
+
+============================================
+For expressions
+============================================
+
+for e in v {
+  bar(e);
+}
+
+for i in 0..256 {
+  bar(i);
+}
+
+'outer: for x in 0..10 {
+    'inner: for y in 0..10 {
+        if x % 2 == 0 { continue 'outer; }
+        if y % 2 == 0 { continue 'inner; }
+    }
+}
+
+---
+
+(source_file
+  (for_expression (identifier) (identifier) (block
+    (call_expression (identifier) (arguments (identifier)))))
+  (for_expression (identifier) (range_expression (integer_lit) (integer_lit)) (block
+    (call_expression (identifier) (arguments (identifier)))))
+  (for_expression (loop_label (identifier)) (identifier) (range_expression (integer_lit) (integer_lit)) (block
+    (for_expression (loop_label (identifier)) (identifier) (range_expression (integer_lit) (integer_lit)) (block
+      (if_expression (binary_expression (binary_expression (identifier) (integer_lit)) (integer_lit)) (block
+        (continue_expression (loop_label (identifier)))))
+      (if_expression (binary_expression (binary_expression (identifier) (integer_lit)) (integer_lit)) (block
+        (continue_expression (loop_label (identifier))))))))))
+
+============================================
+Field expressions
+============================================
+
+mystruct.myfield;
+foo().x;
+value.0.1.iter();
+1.max(2);
+
+---
+
+(source_file
+  (field_expression (identifier) (field_identifier))
+  (field_expression (call_expression (identifier) (arguments)) (field_identifier))
+  (call_expression
+    (field_expression
+      (field_expression (field_expression (identifier) (integer_lit)) (integer_lit))
+      (field_identifier))
+    (arguments))
+  (call_expression
+    (field_expression (integer_lit) (field_identifier)) (arguments (integer_lit))))
+
+============================================
+Method call expressions
+============================================
+
+mystruct.foo();
+
+---
+
+(source_file (call_expression (field_expression (identifier) (field_identifier)) (arguments)))
+
+============================================
+Index expressions
+============================================
+
+([1, 2, 3, 4])[0];
+arr[10];
+arr[n];
+
+---
+
+(source_file
+  (index_expression
+    (single_parenthesized_expression
+      (array_expression (integer_lit) (integer_lit) (integer_lit) (integer_lit)))
+    (integer_lit))
+  (index_expression (identifier) (integer_lit))
+  (index_expression (identifier) (identifier)))
+
+============================================
+Scoped functions
+============================================
+
+a::b();
+C::<D>::e();
+::f();
+::g::h();
+
+---
+
+(source_file
+  (call_expression
+    (scoped_identifier (identifier) (identifier))
+    (arguments))
+  (call_expression
+    (scoped_identifier
+      (generic_type (type_identifier) (type_args (type_identifier)))
+      (identifier))
+    (arguments))
+  (call_expression (scoped_identifier (identifier)) (arguments))
+  (call_expression (scoped_identifier (scoped_identifier (identifier)) (identifier)) (arguments)))
+
+============================================
+Scoped functions with fully qualified syntax
+============================================
+
+<Dog as Animal>::eat(d);
+
+---
+
+(source_file
+  (call_expression
+    (scoped_identifier
+      (bracket_type (qualified_type (type_identifier) (type_identifier)))
+      (identifier))
+    (arguments (identifier))))
+
+============================================
+Scoped functions with macros as types
+============================================
+
+<Token![]>::foo();
+
+---
+
+(source_file
+  (call_expression
+    (scoped_identifier
+      (bracket_type (macro_invoc
+        (identifier)
+        (token_tree)))
+      (identifier))
+    (arguments)))
+
+============================================
+Generic functions
+============================================
+
+std::sizeof::<u32>();
+foo::<8>();
+
+---
+
+(source_file
+  (call_expression
+    function: (generic_function
+      function: (scoped_identifier
+        path: (identifier)
+        name: (identifier))
+      type_arguments: (type_args
+        (primitive_type)))
+    arguments: (arguments))
+  (call_expression
+    function: (generic_function
+      function: (identifier)
+      type_arguments: (type_args
+        (integer_lit)))
+    arguments: (arguments)))
+
+===========================================
+Closures
+===========================================
+
+a.map(|(b, c)| b.push(c));
+d.map(move |mut e| {
+    f(e);
+    g(e)
+});
+h(|| -> i { j });
+
+---
+
+(source_file
+  (call_expression
+    (field_expression (identifier) (field_identifier))
+    (arguments
+      (closure_expression
+        (closure_parameters (tuple_pattern (identifier) (identifier)))
+        (call_expression
+          (field_expression (identifier) (field_identifier))
+          (arguments (identifier))))))
+  (call_expression
+    (field_expression (identifier) (field_identifier))
+    (arguments
+      (closure_expression
+        (closure_parameters (mut_pattern (mutable_specifier) (identifier)))
+        (block
+          (call_expression (identifier) (arguments (identifier)))
+          (call_expression (identifier) (arguments (identifier)))))))
+  (call_expression
+    (identifier)
+    (arguments
+      (closure_expression
+        (closure_parameters)
+        (type_identifier)
+        (block (identifier))))))
+
+===========================================
+Closures with typed parameteres
+===========================================
+
+a.map(|b: usize| b.push(c));
+
+---
+
+(source_file
+  (call_expression
+    (field_expression (identifier) (field_identifier))
+    (arguments (closure_expression
+      (closure_parameters (parameter (identifier) (primitive_type)))
+      (call_expression (field_expression (identifier) (field_identifier)) (arguments (identifier)))))))
+
+===========================================
+Unsafe blocks
+===========================================
+
+const a : A = unsafe { foo() };
+
+---
+
+(source_file
+  (const_item
+    (identifier)
+    (type_identifier)
+    (unsafe_block (block (call_expression (identifier) (arguments))))))
+
+===========================================
+Inline const or Const blocks as expression
+===========================================
+
+const { 1 + 3 };
+if *x < 0 { const { &4i32.pow(4) } } else { x }
+let three_ranges = [const { (0..=5).into_inner() }; 3];
+
+---
+
+(source_file
+  (const_block
+    body: (block
+      (binary_expression
+        left: (integer_lit)
+        right: (integer_lit))))
+  (empty_stm)
+  (if_expression
+    condition: (binary_expression
+      left: (unary_expression
+        (identifier))
+      right: (integer_lit))
+    then: (block
+      (const_block
+        body: (block
+          (reference_expression
+            value: (call_expression
+              function: (field_expression
+                value: (integer_lit)
+                field: (field_identifier))
+              arguments: (arguments
+                (integer_lit)))))))
+    else: (else_clause
+      (block
+        (identifier))))
+  (let_declaration
+    pattern: (identifier)
+    value: (array_expression
+      (const_block
+        body: (block
+          (call_expression
+            function: (field_expression
+              value: (single_parenthesized_expression
+                (range_expression
+                  (integer_lit)
+                  (integer_lit)))
+              field: (field_identifier))
+            arguments: (arguments))))
+      length: (integer_lit))))
