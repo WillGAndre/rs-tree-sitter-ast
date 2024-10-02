@@ -1,4 +1,4 @@
-# tree-sitter-rust by WillGAndre
+# tree-sitter-rust
 
 tree-sitter AST generator for Rust.
 
